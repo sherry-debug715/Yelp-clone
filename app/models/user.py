@@ -10,6 +10,10 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(40), nullable=False, unique=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
     hashed_password = db.Column(db.String(255), nullable=False)
+    zip_code = db.Column(db.String(10), nullable=False )
+    photo = db.Column(db.String)
+    city = db.Column(db.String(40))
+    state = db.Column(db.String(40))
 
     @property
     def password(self):
@@ -28,3 +32,21 @@ class User(db.Model, UserMixin):
             'username': self.username,
             'email': self.email
         }
+
+# one to many relationship with businesses
+businesses = db.relationship('Business', back_populates='user', lazy='subquery', cascade="all, delete-orphan")
+# one to many relationship with reviews
+reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
+
+def to_dict(self):
+    return {
+        'id': self.id,
+        'username': self.username,
+        'email': self.email,
+        'zip_code': self.zip_code,
+        'photo':self.photo,
+        'city':self.city,
+        'state':self.state,
+        'business': [business.to_dict() for business in self.businesses],
+        'review': [review.to_dict() for review in self.reviews]
+    }
